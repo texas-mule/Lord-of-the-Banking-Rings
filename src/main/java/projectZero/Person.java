@@ -1,12 +1,5 @@
-/**
- * 
- */
 package projectZero;
 
-/**
- * @author owd45
- *
- */
 public class Person {
 	private int personID; //Primary Key
 	private int personTypeID; //Foreign Key
@@ -14,7 +7,36 @@ public class Person {
 	private String password; //For the worlds most "secure" password storage
 	private String name;
 	
-	public Person(String userName, )
+	public Person(int id, int typeId, String userName, String password, String name) {
+		personID = id;
+		personTypeID = typeId;
+		this.userName = userName;
+		this.password = password;
+		this.name = name;
+	}
+	
+	public int getPersonID() {
+		return personID;
+	}
+
+	public int getPersonTypeID() {
+		return personTypeID;
+	}
+
+	public String getUserName() {
+		return userName;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	
+	
 	
 	public int[] getAccounts() {
 		
