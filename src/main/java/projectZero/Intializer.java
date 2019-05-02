@@ -9,13 +9,8 @@ public class Intializer {
 
 	public Intializer() {
 		Connection con = connect();
-		Authentication.authenticate(con, sc);
-		try {
-			con.close();
-		} catch (SQLException e) {
-			System.out.println("close connection failed");
-			e.printStackTrace();
-		}
+		Person user = Authentication.authenticate(con, sc);
+		LoggedInUserActions userActions = new LoggedInUserActions(con, sc, user);
 	}
 	
 	public static Connection connect() {
