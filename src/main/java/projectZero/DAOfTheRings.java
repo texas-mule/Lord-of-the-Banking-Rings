@@ -258,7 +258,7 @@ public class DAOfTheRings {
 		try {
 			String sql = "UPDATE ownership_link Set ownership_status_id = " + CANCELED + " WHERE account_id = ?";
 			PreparedStatement ps = con.prepareStatement(sql);
-			ps.execute();
+			ps.executeUpdate();
 		} catch (
 
 		Exception e) {
@@ -291,7 +291,7 @@ public class DAOfTheRings {
 			PreparedStatement ps = con.prepareStatement(sql);
 			ps.setDouble(1, bal);
 			ps.setInt(2, id);
-			ps.execute();
+			ps.executeUpdate();
 		} catch (Exception e) {
 			e.printStackTrace();
 			isSucsessful = false;
@@ -316,33 +316,33 @@ public class DAOfTheRings {
 		return count;
 	}
 	
-	public static String[] getAccountInfoById(Connection con, int id) {
-		String[] resultTable;
-		try {
-			int count = getCountOfAccountsByPersonId(con, id);
-			String sql = "SELECT * from get_account_info_by_id('?')";
-			PreparedStatement ps = con.prepareStatement(sql);
-			ps.setInt(1, id);
-			ResultSet rs = ps.executeQuery();
-			resultTable = new String[count];
-			for (int i = 0; 1 < resultTable.length; i++) {
-				rs.next();
-				resultTable[i] = new String("personId: " + rs.getString(1) + "\t accountId: " + rs.getString(2) + "\t username: " + rs.getString(3)
-						+ "\t full name: " + rs.getString(4) + "\t person type" + rs.getString(5) + "\t balance: "
-						+ rs.getString(6) + "\t account status: " + rs.getString(7));
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			resultTable = null;
-		}
-		return resultTable;
-
-	}
+//	public static String[] getAccountInfoById(Connection con, int id) {
+//		String[] resultTable;
+//		try {
+//			int count = getCountOfOwnershipLinksByPersonId(con, id);
+//			String sql = "SELECT * from get_account_info_by_id('?')";
+//			PreparedStatement ps = con.prepareStatement(sql);
+//			ps.setInt(1, id);
+//			ResultSet rs = ps.executeQuery();
+//			resultTable = new String[count];
+//			for (int i = 0; 1 < resultTable.length; i++) {
+//				rs.next();
+//				resultTable[i] = new String("personId: " + rs.getString(1) + "\t accountId: " + rs.getString(2) + "\t username: " + rs.getString(3)
+//						+ "\t full name: " + rs.getString(4) + "\t person type" + rs.getString(5) + "\t balance: "
+//						+ rs.getString(6) + "\t account status: " + rs.getString(7));
+//			}
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			resultTable = null;
+//		}
+//		return resultTable;
+//
+//	}
 
 	public static String[] getAccountInfo(Connection con) {
 		String[] resultTable;
 		try {
-			int count = getCountOfAccounts(con);
+			int count = getCountOfOwnershipLinks(con);
 			String sql = "SELECT * from account_info";
 			PreparedStatement ps = con.prepareStatement(sql);
 			ResultSet rs = ps.executeQuery();
@@ -350,7 +350,7 @@ public class DAOfTheRings {
 			for (int i = 0; i < count; i++) {
 				rs.next();
 				resultTable[i] = new String("personId: " + rs.getString(1) + "\t accountId: " + rs.getString(2) + "\t username: " + rs.getString(3)
-				+ "\t full name: " + rs.getString(4) + "\t person type" + rs.getString(5) + "\t balance: "
+				+ "\t full name: " + rs.getString(4) + "\t person type: " + rs.getString(5) + "\t balance: "
 				+ rs.getString(6) + "\t account status: " + rs.getString(7));
 			}
 		} catch (Exception e) {
@@ -367,7 +367,7 @@ public class DAOfTheRings {
 			String sql = "SELECT (create_account(?, " + PENDING_APPROVAL + "))";
 			PreparedStatement ps = con.prepareStatement(sql);
 			ps.setInt(1, id);
-			ps.execute();
+			ps.executeUpdate();
 		} catch (Exception e) {
 			//e.printStackTrace(); //It prints an error but runs fine
 			isSuccesful = false;
@@ -378,11 +378,11 @@ public class DAOfTheRings {
 	public static boolean createJoinRequestAccount(Connection con, int perId, int accId) {
 		boolean isSuccesful = true;
 		try {
-			String sql = "INSERT INTO ownership_link VALUES(?, ?, " + PENDING_JOIN + ")";
+			String sql = "INSERT INTO ownership_link (person_id, account_id, ownership_status_id) VALUES(?, ?, " + PENDING_JOIN + ")";
 			PreparedStatement ps = con.prepareStatement(sql);
 			ps.setInt(1, perId);
 			ps.setInt(2, accId);
-			ps.execute();
+			ps.executeUpdate();
 		} catch (Exception e) {
 			e.printStackTrace();
 			isSuccesful = false;
@@ -394,7 +394,7 @@ public class DAOfTheRings {
 		int count;
 		try {
 			String sql = "SELECT count(ownership_link_id) FROM ownership_link WHERE ownership_status_id = "
-					+ PENDING_APPROVAL + " AND person_id = ?";
+					+ PENDING_JOIN + " AND person_id = ?";
 			PreparedStatement ps = con.prepareStatement(sql);
 			ps.setInt(1, perId);
 			ResultSet rs = ps.executeQuery();
@@ -435,7 +435,7 @@ public class DAOfTheRings {
 			PreparedStatement ps = con.prepareStatement(sql);
 			ps.setInt(1, accId);
 			ps.setInt(2, perId);
-			ps.execute();
+			ps.executeUpdate();
 		} catch (Exception e) {
 			e.printStackTrace();
 			isSuccesful = false;
@@ -453,7 +453,7 @@ public class DAOfTheRings {
 			PreparedStatement ps = con.prepareStatement(sql);
 			ps.setInt(1, accId);
 			ps.setInt(2, perId);
-			ps.execute();
+			ps.executeUpdate();
 		} catch (Exception e) {
 			e.printStackTrace();
 			isSuccesful = false;
@@ -504,7 +504,7 @@ public class DAOfTheRings {
 			PreparedStatement ps = con.prepareStatement(sql);
 			ps.setInt(1, accId);
 			ps.setInt(2, perId);
-			ps.execute();
+			ps.executeUpdate();
 		} catch (Exception e) {
 			e.printStackTrace();
 			isSuccesful = false;
@@ -522,7 +522,7 @@ public class DAOfTheRings {
 			PreparedStatement ps = con.prepareStatement(sql);
 			ps.setInt(1, accId);
 			ps.setInt(2, perId);
-			ps.execute();
+			ps.executeUpdate();
 		} catch (Exception e) {
 			e.printStackTrace();
 			isSuccesful = false;

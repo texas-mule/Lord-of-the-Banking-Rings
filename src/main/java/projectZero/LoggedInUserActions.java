@@ -24,7 +24,7 @@ public class LoggedInUserActions {
 			System.out.println("4 to make a transfer from one of your accounts to another account");
 			System.out.println("5 to request a new account");
 			System.out.println("6 to request a account of yours be joined with another user");
-			System.out.println("7 to accept join requests from other users");
+			System.out.println("7 to handle join requests from other users");
 			if (personType == 2 || personType == 3) {
 				System.out.println("");
 				System.out.println("As an employee you may also press:");
@@ -109,7 +109,7 @@ public class LoggedInUserActions {
 				}
 			default:
 				System.out.println("Invalid option, Goodbye");
-				System.exit(0);
+				exit = true;
 			}
 
 		}
@@ -200,10 +200,12 @@ public class LoggedInUserActions {
 	private void handleJointAccountRequests() {
 		System.out.println("What join request would you like to handle?");
 		OwnershipLink[] ownershipLinks = DAOfTheRings.getJoinRequestsByPersonId(con, user.getId());
-		for (OwnershipLink i : ownershipLinks) {
-			System.out.println(i.getAccount_id());
+		int[] accountIds = new int[ownershipLinks.length];
+		for (int i = 0; i<ownershipLinks.length; i++) {
+			System.out.println(ownershipLinks[i].getAccount_id());
+			accountIds[i] = ownershipLinks[i].getAccount_id();
 		}
-		int accId = StubbornScanner.scanInt(sc);
+		int accId = StubbornScanner.scanValidId(sc, accountIds);
 
 		System.out.println("Do you want to aprrove this link? enter 'y' for yes");
 		String userInput = sc.next();
