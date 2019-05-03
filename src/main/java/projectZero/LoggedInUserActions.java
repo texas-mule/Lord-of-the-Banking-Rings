@@ -74,7 +74,7 @@ public class LoggedInUserActions {
 				break;
 			case 8:
 				if (personType == 2 || personType == 3) {
-					getAllAccounts();
+					getAllAccountInfo();
 					break;
 				}
 			case 9:
@@ -107,6 +107,9 @@ public class LoggedInUserActions {
 					cancelAccount();
 					break;
 				}
+			default:
+				System.out.println("Invalid option, Goodbye");
+				System.exit(0);
 			}
 
 		}
@@ -122,11 +125,11 @@ public class LoggedInUserActions {
 	private void deposit() {
 		Account[] accounts = DAOfTheRings.getOpenAccountsById(con, user.getId());
 		int[] accountIds = getAndPrintAccountIds(accounts);
-		
+
 		System.out.println("Which account would you like to deposit to?");
 		int accountId = StubbornScanner.scanValidId(sc, accountIds);
 		double bal = DAOfTheRings.getAccountBalance(con, accountId);
-		
+
 		System.out.println("How much would you like to deposit?");
 		bal += StubbornScanner.scanDouble(sc);
 		DAOfTheRings.setAccountBalance(con, accountId, bal);
@@ -135,63 +138,117 @@ public class LoggedInUserActions {
 	private void withdraw() {
 		Account[] accounts = DAOfTheRings.getOpenAccountsById(con, user.getId());
 		int[] accountIds = getAndPrintAccountIds(accounts);
-		
+
 		System.out.println("Which account would you like to withdraw from?");
 		int accountId = StubbornScanner.scanValidId(sc, accountIds);
 		double bal = DAOfTheRings.getAccountBalance(con, accountId);
-		
+
 		System.out.println("How much would you like to withdraw?");
 		bal -= StubbornScanner.scanDouble(sc);
-		DAOfTheRings.setAccountBalance(con, accountId, bal);
+		if(bal < 0) {
+			System.out.println("Requested withdraw would overdraw account");
+		}else {
+			DAOfTheRings.setAccountBalance(con, accountId, bal);
+		}
 	}
 
 	private void transfer() {
 		Account[] accounts = DAOfTheRings.getOpenAccountsById(con, user.getId());
 		int[] accountIds = getAndPrintAccountIds(accounts);
-		
+
 		System.out.println("Which account would you like to transfer from?");
 		int accountId = StubbornScanner.scanValidId(sc, accountIds);
 		double bal = DAOfTheRings.getAccountBalance(con, accountId);
-		
+
 		System.out.println("How much would you like to transfer?");
 		double amount = StubbornScanner.scanDouble(sc);
 		bal -= amount;
-		DAOfTheRings.setAccountBalance(con, accountId, bal);
+		if (bal < 0) {
+			System.out.println("Requested transfer would overdraw account");
+		} else {
+			DAOfTheRings.setAccountBalance(con, accountId, bal);
 
-		System.out.println("Which account would you like to transfer to?");
-		Account[] accounts2 = DAOfTheRings.getAllOpenAccounts(con);
-		int[] accountIds2 = getAndPrintAccountIds(accounts2);
-		int accountId2 = StubbornScanner.scanValidId(sc, accountIds2);
-		bal = DAOfTheRings.getAccountBalance(con, accountId2);
-		bal += amount;
+			System.out.println("Which account would you like to transfer to?");
+			Account[] accounts2 = DAOfTheRings.getAllOpenAccounts(con);
+			int[] accountIds2 = getAndPrintAccountIds(accounts2);
+			int accountId2 = StubbornScanner.scanValidId(sc, accountIds2);
+			bal = DAOfTheRings.getAccountBalance(con, accountId2);
+			bal += amount;
+			DAOfTheRings.setAccountBalance(con, accountId2, bal);
+		}
 	}
 
 	private void requestNewAccount() {
-
+		DAOfTheRings.createAccount(con, user.getId());
 	}
 
 	private void requestNewJointAccount() {
+		System.out.println("Who would you like to offer to join your account? Give there id");
+		Person[] persons = DAOfTheRings.getAllPersons(con);
+		for (Person i : persons) {
+			System.out.println(i.getId());
+		}
+		int perId = StubbornScanner.scanInt(sc);
 
+		System.out.println("What account would you like to have joined? Give the id");
+		printAccountsByPersonId();
+		int accId = StubbornScanner.scanInt(sc);
+
+		DAOfTheRings.createJoinRequestAccount(con, perId, accId);
 	}
 
 	private void handleJointAccountRequests() {
+		System.out.println("What join request would you like to handle?");
+		OwnershipLink[] ownershipLinks = DAOfTheRings.getJoinRequestsByPersonId(con, user.getId());
+		for (OwnershipLink i : ownershipLinks) {
+			System.out.println(i.getAccount_id());
+		}
+		int accId = StubbornScanner.scanInt(sc);
 
+		System.out.println("Do you want to aprrove this link? enter 'y' for yes");
+		String userInput = sc.next();
+		userInput = userInput.substring(0, 1);
+		boolean isApproved = userInput.equalsIgnoreCase("y");
+		if (isApproved) {
+			DAOfTheRings.confirmJoin(con, accId, user.getId());
+		} else {
+			DAOfTheRings.denyJoin(con, accId, user.getId());
+		}
 	}
 
 	// Employee only functions (admins are employees)
-	private void getAllAccounts() {
-		Account[] accounts = DAOfTheRings.getAllAccounts(con);
-		for(Account i : accounts) {
-			System.out.println();
+	private void getAllAccountInfo() {
+		String[] accountInfo = DAOfTheRings.getAccountInfo(con);
+		for (String i : accountInfo) {
+			System.out.println(i);
 		}
 	}
 
 	private void queryPersons() {
-
+		Person[] peopleInfo = DAOfTheRings.getAllPersons(con);
+		for (int i = 0; i<peopleInfo.length; i++ ) {
+			System.out.println("personId: " + peopleInfo[i].getId() + "\t username: " + peopleInfo[i].getUserName()
+				+ "\t full name: " + peopleInfo[i].getName() + "\t person typeId: " + peopleInfo[i].getPersonTypeID());
+		}
 	}
 
 	private void manageAccountRequests() {
+		System.out.println("What account request would you like to handle?");
+		OwnershipLink[] ownershipLinks = DAOfTheRings.getAccountRequests(con);
+		for (OwnershipLink i : ownershipLinks) {
+			System.out.println(i.getAccount_id());
+		}
+		int accId = StubbornScanner.scanInt(sc);
 
+		System.out.println("Do you want to aprrove this account? enter 'y' for yes");
+		String userInput = sc.next();
+		userInput = userInput.substring(0, 1);
+		boolean isApproved = userInput.equalsIgnoreCase("y");
+		if (isApproved) {
+			DAOfTheRings.confirmAccount(con, accId, user.getId());
+		} else {
+			DAOfTheRings.denyAccount(con, accId, user.getId());
+		}
 	}
 
 	// Admin only functions
@@ -214,45 +271,54 @@ public class LoggedInUserActions {
 	private void adminWithdraw() {
 		Account[] accounts = DAOfTheRings.getAllOpenAccounts(con);
 		int[] accountIds = getAndPrintAccountIds(accounts);
-		
+
 		System.out.println("Which account would you like to withdraw from?");
 		int accountId = StubbornScanner.scanValidId(sc, accountIds);
 		double bal = DAOfTheRings.getAccountBalance(con, accountId);
-		
+
 		System.out.println("How much would you like to withdraw?");
 		bal -= StubbornScanner.scanDouble(sc);
-		DAOfTheRings.setAccountBalance(con, accountId, bal);
+		if (bal < 0) {
+			System.out.println("Requested withdraw would overdraw account");
+		} else {
+			DAOfTheRings.setAccountBalance(con, accountId, bal);
+		}
 	}
 
 	private void adminTransfer() {
 		Account[] accounts = DAOfTheRings.getAllOpenAccounts(con);
 		int[] accountIds = getAndPrintAccountIds(accounts);
-		
+
 		System.out.println("Which account would you like to transfer from?");
 		int accountId = StubbornScanner.scanValidId(sc, accountIds);
 		double bal = DAOfTheRings.getAccountBalance(con, accountId);
-		
+
 		System.out.println("How much would you like to transfer?");
 		double amount = StubbornScanner.scanDouble(sc);
 		bal -= amount;
-		DAOfTheRings.setAccountBalance(con, accountId, bal);
+		if (bal < 0) {
+			System.out.println("Requested transfer would overdraw account");
+		} else {
+			DAOfTheRings.setAccountBalance(con, accountId, bal);
 
-		System.out.println("Which account would you like to transfer to?");
-		getAndPrintAccountIds(accounts);
-		int accountId2 = StubbornScanner.scanValidId(sc, accountIds);
-		bal = DAOfTheRings.getAccountBalance(con, accountId2);
-		bal += amount;
+			System.out.println("Which account would you like to transfer to?");
+			getAndPrintAccountIds(accounts);
+			int accountId2 = StubbornScanner.scanValidId(sc, accountIds);
+			bal = DAOfTheRings.getAccountBalance(con, accountId2);
+			bal += amount;
+			DAOfTheRings.setAccountBalance(con, accountId2, bal);
+		}
 	}
 
 	private void cancelAccount() {
 		Account[] accounts = DAOfTheRings.getAllNonCancelledAccounts(con);
 		int[] accountIds = getAndPrintAccountIds(accounts);
-		
+
 		System.out.println("Which account would you like to cancel");
-		int accountId = StubbornScanner.scanValidId(sc, accountIds);
+		StubbornScanner.scanValidId(sc, accountIds);
 	}
-	
-	//helper methods
+
+	// helper methods
 	private int[] getAndPrintAccountIds(Account[] accounts) {
 		int[] accountIds = new int[accounts.length];
 		for (int i = 0; i < accounts.length; i++) {
@@ -261,6 +327,4 @@ public class LoggedInUserActions {
 		}
 		return accountIds;
 	}
-	
-
 }

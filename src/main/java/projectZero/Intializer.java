@@ -7,6 +7,7 @@ import java.util.Scanner;
 public class Intializer {
 	Scanner sc = new Scanner(System.in);
 
+	@SuppressWarnings("unused")
 	public Intializer() {
 		Connection con = connect();
 		Person user = Authentication.authenticate(con, sc);
@@ -25,7 +26,6 @@ public class Intializer {
 			e.printStackTrace();
 			con = null; 
 		}
-		return con;
-	
+		return con;	
 	}
 }
